@@ -1,0 +1,620 @@
+---
+title: "AN ANALYSES OF CUSTOMER LOANS"
+author: "Tony Bruce Kyereme"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# INTRODUCTION TO DATASET
+
+```{=tex}
+\vspace{-2.3em}
+\hrulefill
+\rule{\linewidth}{1pt}
+```
+The dataset under study is called **Financial Risk for Loan Approval.** It was obtained from Kaggled Datasets and provides comprehensive details that covers personal and financial metrics of sample of creditors. Its has features like applicant age information, educational background, employment history, family dependencies and credit ratings.\vspace{2.5em}
+
+# DATASET IMPORT
+
+```{=tex}
+\vspace{-2.3em}
+\hrulefill
+\rule{\linewidth}{1pt}
+```
+-   **The data is imported and named the *Credit_Bureau_Data* data frame.**
+
+```{r}
+Credit_Bureau_Data <-read.csv("Loan.csv")
+
+```
+
+-   **Preview the imported data.**
+
+```{r}
+head(Credit_Bureau_Data) 
+```
+
+\vspace{2em}
+
+# EXPLORE THE DATA SET
+
+```{=tex}
+\vspace{-2.3em}
+\hrulefill
+\rule{\linewidth}{1pt}
+```
+-   **The str() function is used to get an overview of the data.**
+
+```{r}
+str(Credit_Bureau_Data)
+```
+
+-   We will with the **factor()** function, convert the categorical data types of the data set into factors so we can work with them in R. The basis of the conversion and how they are ordered is outlined in the table found in next section.
+
+1.  **Convert Nominal Categorical Data into factors**
+
+```{r}
+Credit_Bureau_Data$EmploymentStatus<-
+  factor(Credit_Bureau_Data$EmploymentStatus)
+
+Credit_Bureau_Data$MaritalStatus<- 
+  factor(Credit_Bureau_Data$MaritalStatus)
+
+Credit_Bureau_Data$HomeOwnershipStatus<- 
+  factor(Credit_Bureau_Data$HomeOwnershipStatus)
+
+Credit_Bureau_Data$LoanPurpose<- 
+  factor(Credit_Bureau_Data$LoanPurpose)
+
+```
+
+2.  **Convert Ordinal Categorical Data and confirm that they are ordered correctly**
+
+```{r}
+Credit_Bureau_Data$EducationLevel<-
+  
+  factor(Credit_Bureau_Data$EducationLevel, 
+  levels = c("High School","Bachelor","Associate","Master","Doctorate"
+  ), ordered = TRUE)
+
+levels(Credit_Bureau_Data$EducationLevel)
+
+```
+
+3.  **Confirm that data conversions are done**
+
+```{r}
+str(Credit_Bureau_Data)
+```
+
+\vspace{5.5em}
+
+# DESCRIPTION OF THE DATASET
+
+```{=tex}
+\vspace{-2.3em}
+\hrulefill
+\rule{\linewidth}{1pt}
+```
+-   **Variables**
+
+The dataset has 20,000 records under 36 columns or variables. The table below shows the details of the various columns, their respective data types, and the basis for converting the datatypes (as done in steps 2 and 3 while exploring the data).
+
+| No. | Variable/Column Name       |     | Description                  | Datatype       | Remarks                                                                                 |
+|-----|----------------------------|-----|------------------------------|----------------|-----------------------------------------------------------------------------------------|
+| 1   | ApplicationDate            |     | Loan application date        | Char           |                                                                                         |
+| 2   | Age                        |     | Applicant's age              | Int            | Discrete Data                                                                           |
+| 3   | AnnualIncome               |     | Yearly income                | Int            | Discrete Data                                                                           |
+| 4   | CreditScore                |     | Creditworthiness score       | Int            | Discrete Data                                                                           |
+| 5   | EmploymentStatus           |     | Job situation                | Factor         | This is nominal data. Has no inherent order                                             |
+| 6   | EducationLevel             |     | Highest education attained   | Ordered Factor | This is ordinal data. It can be ordered from lower to high levels of study in academia. |
+| 7   | Experience                 |     | Work experience              | Int            |                                                                                         |
+| 8   | LoanAmount                 |     | Requested loan size          | Int            |                                                                                         |
+| 9   | LoanDuration               |     | Loan repayment period        | Int            |                                                                                         |
+| 10  | MaritalStatus              |     | Applicant's marital state    | Factor         |                                                                                         |
+| 11  | NumberOfDependents         |     | Number of dependents         | Int            | Discrete Data                                                                           |
+| 12  | HomeOwnershipStatus        |     | Home ownership type          | Factor         |                                                                                         |
+| 13  | MonthlyDebtPayments        |     | Monthly debt obligations     | Int            | Discrete Data                                                                           |
+| 14  | CreditCardUtilizationRate  |     | Credit card usage percentage | Num            | Continuous Data                                                                         |
+| 15  | NumberOfOpenCreditLines    |     | Active credit lines          | Int            |                                                                                         |
+| 16  | NumberOfCreditInquiries    |     | Credit checks count          | Int            |                                                                                         |
+| 17  | DebtToIncomeRatio          |     | Debt to income proportion    | Num            | Continuous Data                                                                         |
+| 18  | BankruptcyHistory          |     | Bankruptcy records           | Int            |                                                                                         |
+| 19  | LoanPurpose                |     | Reason for loan              | Factor         | This is nominal data. Its has no inherent order                                         |
+| 20  | PreviousLoanDefaults       |     | Prior loan defaults          | Int            |                                                                                         |
+| 21  | PaymentHistory             |     | Past payment behavior        | Int            | Discrete Data                                                                           |
+| 22  | LengthOfCreditHistory      |     | Credit history duration      | Int            |                                                                                         |
+| 23  | SavingsAccountBalance      |     | Savings account amount       | Int            | Discrete Data                                                                           |
+| 24  | CheckingAccountBalance     |     | Checking account funds       | Int            | Discrete Data                                                                           |
+| 25  | TotalAssets                |     | Total owned assets           | Int            | Discrete Data                                                                           |
+| 26  | TotalLiabilities           |     | Total owed debts             | Int            | Discrete Data                                                                           |
+| 27  | MonthlyIncome              |     | Income per month             | Num            | Continuous Data                                                                         |
+| 28  | UtilityBillsPaymentHistory |     | Utility payment record       | Num            | Continuous Data                                                                         |
+| 29  | JobTenure                  |     | Job duration                 | Int            |                                                                                         |
+| 30  | NetWorth                   |     | Total financial worth        | Int            | Discrete Data                                                                           |
+| 31  | BaseInterestRate           |     | Starting interest rate       | Num            | Continuous Data                                                                         |
+| 32  | InterestRate               |     | Applied interest rate        | Num            | Continuous Data                                                                         |
+| 33  | MonthlyLoanPayment         |     | Monthly loan payment         | Num            | Continuous Data                                                                         |
+| 34  | TotalDebtToIncomeRatio     |     | Total debt against income    | Num            | Continuous Data                                                                         |
+| 35  | LoanApproved               |     | Loan approval status         | Int            | 0 means a loan is approved while 1 means it is declined                                 |
+| 36  | RiskScore                  |     | Risk assessment score        | Num            | Continuous Data                                                                         |
+|     |                            |     |                              |                |                                                                                         |
+
+-   **Some observations about the dataset**
+
+Although the variables **Annual Income**, **Monthly Debt Payments**, **Payment History**, **Savings Account Balance**, **Checking Account Balance**, **Total Assets**, **Total Liabilities**, and **Net Worth** are treated as discrete values in this dataset, they are not inherently discrete. In fact, these variables are continuous by nature, as they can take any value within a range and could be more accurately represented as continuous data in other datasets.
+
+On the other hand, variables such as **Age** is inherently discrete. Its takes specific integer values and cannot be meaningfully subdivided.
+
+# SUMMARY OF THE DATA
+
+```{=tex}
+\vspace{-2.3em}
+\hrulefill
+\rule{\linewidth}{1pt}
+```
+-   **Variables**
+
+The statistical calculations below will be done on the **Age** and **RiskScore** numerical variables.
+
+1.  **AGE**
+
+We will assign the results of the values to respective variables and print them out. The **round()** function has been used to round up mean ,variance and standard deviation values into 2 decimal place figures. The **cat()** function is also used to show the labels and their results.
+
+```{r}
+
+mean_Age <- mean(Credit_Bureau_Data$Age)
+cat("Mean Age -",round(mean_Age,2), "\n")
+
+median_Age <- median(Credit_Bureau_Data$Age)
+cat("Median Age - ",median_Age, "\n")
+
+variance_Age <- var(Credit_Bureau_Data$Age)
+cat("Age Variance -", round(variance_Age,2),"\n")
+
+standard_deviation_Age <- sd(Credit_Bureau_Data$Age)
+cat( "Standard deviation of Age -", round(standard_deviation_Age,2), "\n")
+
+range_Age <- range(Credit_Bureau_Data$Age)
+cat("Age Range -",range_Age,"\n")
+
+interquartile_Age <- IQR(Credit_Bureau_Data$Age)
+cat("Interquartile Age -", interquartile_Age, "\n")
+
+quartiles_Age<-  quantile(Credit_Bureau_Data$Age,
+              probs = c(0, 0.25, 0.5, 0.75, 1),na.rm = TRUE)
+cat("Quartiles of the Age -","\n")
+
+print(round(quartiles_Age,2))
+
+```
+
+***Explanations***
+
+Quartiles of the Age have the interpretation below:
+
+Minimum Age - 18,
+
+Q1 - 32
+
+Q2 - 40
+
+Q3 - 48
+
+Maximum Age - 80
+
+The variance in ages is 135.09, and the standard deviation is 11.62, suggesting a moderate level of variability among clients' ages.
+
+\vspace{2.5em}
+
+2.  **RISKSCORE**
+
+We will assign the results of the values to respective variables and print them out. The **round()** function has been used to round up mean ,variance and standard deviation values into 2 decimal place figures. The **cat()** function is also used to show the labels and their results.
+
+```{r}
+
+mean_RiskScore <- mean(Credit_Bureau_Data$RiskScore)
+cat("Mean RiskScore -",round(mean_RiskScore,2), "\n")
+
+median_RiskScore <- median(Credit_Bureau_Data$RiskScore)
+cat("Median RiskScore - ",round(median_RiskScore,2), "\n")
+
+variance_RiskScore <- var(Credit_Bureau_Data$RiskScore)
+cat("RiskScore Variance -", round(variance_RiskScore,2),"\n")
+
+standard_deviation_RiskScore <- sd(Credit_Bureau_Data$RiskScore)
+cat( "Standard deviation of RiskScore -", 
+     round(standard_deviation_RiskScore,2), "\n")
+
+range_RiskScore <- range(Credit_Bureau_Data$RiskScore)
+cat("RiskScore Range -",round(range_RiskScore,2),"\n")
+
+interquartile_RiskScore <- IQR(Credit_Bureau_Data$RiskScore)
+cat("Interquartile RiskScore -", round(interquartile_RiskScore,2), "\n")
+
+quartiles_RiskScore<-  quantile(Credit_Bureau_Data$RiskScore,
+                      probs = c(0, 0.25, 0.5, 0.75, 1),na.rm = TRUE)
+cat("Quartiles of the RiskScore -","\n")
+
+print(round(quartiles_RiskScore,2))
+
+```
+
+***Explanations***
+
+Quartiles of the RiskScore have the interpretation below:
+
+Minimum RiskScore - 28.8
+
+Q1 - 46.0
+
+Q2 - 52.0
+
+Q3 - 56.0
+
+Maximum RiskScore - 84.0
+
+The mean risk score of applicants is 50.77, with a median of 52. This means that the risk score distribution is fairly balanced around the center although the standard deviation of 7.78 suggests some variability.
+
+\vspace{2.5em}
+
+-   **Creating contingency Tables**
+
+1.  The contingency table for EmploymentStatus and EducationLevel.
+
+    This table will be called the Education_Employment_Link. We will also use the **addmargins()** function to show totals in the table. The **table()** function is used to create the table in R.
+
+```{r}
+Education_Employment_Link <- 
+addmargins(table(Credit_Bureau_Data$EmploymentStatus,
+Credit_Bureau_Data$EducationLevel))
+
+Education_Employment_Link
+```
+
+2.  The next contingency table is for for MaritalStatus and HomeOwnershipStatus. This table will be called the Married_HomeOwnership_Link. We will also use the **addmargins()** function to show totals in the table and the **table()** function is used to create the table in R.
+
+```{r}
+Married_HomeOwnership_Link <- addmargins(table(Credit_Bureau_Data$MaritalStatus,Credit_Bureau_Data$HomeOwnershipStatus))
+Married_HomeOwnership_Link
+```
+
+***Notes***
+
+A study of the data set variables show that not all of the 20,000 loan applications are approved. The above contingency tables do not factor whether applicant loans were approved or not.
+
+\vspace{2.5em}
+
+-   **Visual Representations of the Data**
+
+1.  **HISTOGRAM**
+
+```{r}
+hist(Credit_Bureau_Data$Age, 
+        main= "Distribution of Ages of Clients", 
+        xlab= "Age",
+        ylab= "Frequency(Clients)",
+        col = "orange"
+        )
+```
+
+***Explanation***
+
+The distribution of client ages is centered around the median age 40, indicating a moderately symmetrical and unimodal age distribution.
+
+2.  **BAR CHART**
+
+To create bar chart, we first create a frequency table called **LoanPurpose_table** and preview it with the **head()** function.
+
+```{r}
+LoanPurpose_table<- table(Credit_Bureau_Data$LoanPurpose)
+head (LoanPurpose_table)
+
+```
+
+```{r}
+barplot(LoanPurpose_table,
+        main = "Distribution of Loan Purposes",
+        col = "orange",
+        ylab= "Customers (Frequency)", 
+        xlab ="Loan Purpose")
+
+```
+
+The bar chart on loan purposes shows a unimodal distribution in which home loans are the most common type of loan requested, followed by debt consolidation, auto loans, education, and other purposes.
+
+Let us create another contingency table to explore the relationship between home as a purpose of applying for a loan and the home ownership of the applicant. We would assume that clients with mortgages and those with their own houses are home owners for the calculations.
+
+```{r}
+Purpose_HomeOwnership_Link <- 
+addmargins(table(Credit_Bureau_Data$LoanPurpose,
+  Credit_Bureau_Data$HomeOwnershipStatus))
+
+
+Purpose_HomeOwnership_Link
+```
+
+Furthermore. refering to the table above let us find the percentage of applicants who apply for loans for their homes using the formula below =
+
+Loan_for_Home = (Mortgage Owners with Home as loan purpose + Own home with Home as loan purpose) ÷ Total Loan applicants with Home as loan purpose
+
+```{r}
+Loan_for_Home  <- round(sum (2375,1177)/ 5925,2)
+Loan_for_Home 
+```
+
+***Explanation***\
+Given that the bar chart shows home as the main purpose of loan applications. Further analysis show 60% of applicants who apply for loans with home as the purpose have a mortgage or own their homes.\
+\
+This may explain the strong preference for home-related financial needs among those clients.
+
+3.  **SCATTER PLOT**
+
+```{r}
+plot(Credit_Bureau_Data$RiskScore,Credit_Bureau_Data$MonthlyLoanPayment,
+main = "Riskscore vs Monthly Loan Payment",
+xlab = "RiskScore",
+ylab = "Monthly Loan Payment")
+
+```
+
+***Explanation\
+***\
+While the relationship between risk score and monthly loan payment in the above scatter plot is not linear, borrowers with lower risk scores (below 40) and higher risk scores (above 70) tend to have smaller monthly loan payments.
+
+4.  **BOX PLOT ON MULTIPLE EDUCATIONAL LEVELS**
+
+```{R}
+boxplot(Credit_Bureau_Data$CreditScore~Credit_Bureau_Data$EducationLevel,
+main = "Relationship between Credit Scores and Educational Levels",
+xlab = "Educational Level",
+ylab = "Credit Score",
+col = c("lightblue", "yellow", "lightgreen", "grey", "orange"))
+```
+
+***Explanation***
+
+Examining credit scores across various through the box plot above shows that applicants with higher educational attainment generally possess higher credit scores. Specifically from the educational levels of associate degree and above, there is a positive correlation between advanced education and creditworthiness. Doctorate degree applicants have the highest mean on their credit worthiness.
+
+\vspace{3.0em}
+
+# PROBABILITY CALCULATIONS
+
+```{=tex}
+\vspace{-2.3em}
+\hrulefill
+\rule{\linewidth}{1pt}
+```
+-   **Selected Events**
+
+1.  The Event that a loan application is approved
+
+2.  The Event that a loan applicant is unemployed
+
+-   **Probability of the selected events**
+
+1.  The formula below can be used in finding the probability that a loan application is approved. P(Approved_Loan).
+
+P(Approved_Loan) = Number of Applications Approved ÷ Total Number of Loan Applicants
+
+*First find the number of applicants with Approved_Loan.* We will use the **nrow()** functionto aggregate the record counts and the **subset()** function to filter the records to be summed in R.
+
+```{r}
+
+Approved_Loan <- 
+  nrow(subset(Credit_Bureau_Data, LoanApproved == 0 ))
+Approved_Loan
+
+```
+
+*Then we find the total number of applicants (Please note this variable as it would be used in other calculations)*
+
+```{r}
+
+Total_Applicants <- nrow(Credit_Bureau_Data)
+Total_Applicants
+
+```
+
+*Now we would calculate the probability*. We use the **round ()** function to render the result into two decimal places.
+
+P(Approved_Loan)
+
+```{r}
+
+Probability_Approved_Loan<- 
+  round(Approved_Loan/Total_Applicants,2)
+Probability_Approved_Loan
+```
+
+**Explanation**
+
+There is a 76% chance that an applicant's loan will be approved.
+
+\vspace{3em}
+
+2.  The formula below can be used in finding the probability that a loan applicant is unemployed
+
+P(unemployed_Loan_Applied) = Number of Unemployed Applicants ÷ Total Number of Loan Applicants
+
+*First find the number of applicants who are unemployed.* We will use the **nrow()** functionto aggregate the record counts and the **subset()** function to filter the records to be summed in R.
+
+```{r}
+
+unemployed_Loans_Applied <- 
+  nrow(subset(Credit_Bureau_Data, EmploymentStatus == "Unemployed" ))
+unemployed_Loans_Applied
+
+```
+
+*Secondly,* the total number of applicants is already given a variable *Total_Applicants.*
+
+*Now we would calculate the probability*. We use the **round ()** function to render the result into two decimal places.
+
+P(unemployed_Loan_Applied)
+
+```{r}
+
+Probability_unemployed_Loans_Applied<- 
+  round(unemployed_Loans_Applied/Total_Applicants,2)
+Probability_unemployed_Loans_Applied
+```
+
+**Explanation**
+
+The probability that a loan applicant is unemployed is 7%.
+
+-   **Finding Selected Conditional Probabilities**
+
+First we will add a new categorical variable for Loan Approved Column to the dataset and then create contingency tables to help guide our calculations on the conditional probabilities.
+
+We will call the new colums LoanApproved_Interpretation. *Note from the data set that 1 means a loan is declined while 0 means a loan is approved.* The **ifelse()** function will used this logic be used to determine how the data in the new column would be categorized whether "Declined" or "Approved". We can preview the updated dataset with the **head()** function.
+
+```{r}
+Credit_Bureau_Data$LoanApproved_Interpretation <-
+  factor(ifelse(Credit_Bureau_Data$LoanApproved == 1, "Declined",
+         ifelse(Credit_Bureau_Data$LoanApproved == 0, "Approved", NA))) 
+
+head(Credit_Bureau_Data) 
+
+```
+
+Now we can create the contingency table showing the relationship between Loans approved and the educational backgrounds of the applicants. We will call is the Approval_Education_Link
+
+```{r}
+
+Approval_Education_Link <- 
+  addmargins(table(Credit_Bureau_Data$EducationLevel,
+    Credit_Bureau_Data$LoanApproved_Interpretation))
+
+
+Approval_Education_Link
+
+```
+
+-   **Calculating the Conditional Probabilities**
+
+1.  Find the probability that a loan application is doctorate's degree given that they had an approved loan. This gives the following events
+
+Event A - is doctorate's degree
+
+Event B - had an approved loan
+
+*The formular below can be used for the computation:*
+
+Probability(A\|B) = Probability (Event A and Event B)÷ Probability(Event B)
+
+*Fisst Calculate probability that an applicants with doctorate degree received a loan approval.* Call this Probability_Approved_Loans_Doctorate and use the **round()** function to round to 2 decimals
+
+```{r}
+
+Approved_Loans_Doctorate <- 
+  nrow(subset(Credit_Bureau_Data, 
+      EducationLevel == "Doctorate" & LoanApproved == "0"))
+
+Probability_Approved_Loans_Doctorate <- round (
+  Approved_Loans_Doctorate/Total_Applicants,2)
+
+Probability_Approved_Loans_Doctorate
+```
+
+*Next, find probability that an applicant has a loan approved. This has already been calculated in the first event and called Probability_Approved_Loan\
+*
+
+Probability(A\|B) =
+
+```{r}
+
+Probability_A_given_B_1 <- 
+  round (Probability_Approved_Loans_Doctorate/Probability_Approved_Loan,2)
+
+Probability_A_given_B_1
+```
+
+**Explanation** 1
+
+There is a 4% chance that an application was made by an applicant with a doctorate's degree given that the application was approved.
+
+An inversion of this statement holds true and shows striking discovery of the data.
+
+The statement can be inverted as Probability that a loan application is not made by a doctorate's degree holder given that it is approved.
+
+This inversion can be calculated by subtracting 4 % from 1
+
+```{r}
+
+Inverted_Probability_1 <- round (1- Probability_A_given_B_1,3)
+Inverted_Probability_1
+```
+
+**Explanation** 1
+
+The chance that a loan application is not made by a doctorate's degree holder given that it is approved 96%. This is intriguing noting that applicants with doctorates degrees have higher credit scores compared to those without doctorate degree as shown in the box plot.
+
+2.  Finding the probability that a loan applicant is unemployed given that their loan is approved.
+
+Event A - applicant is unemployed
+
+Event B - loan is approved
+
+Probability(A\|B) = Probability (Event A and Event B)÷ Probability(Event B)
+
+Let us create another contingency table showing the relationship between Loans approved and the employment statuses to the above conditional probability
+
+```{r}
+
+Approval_Employment_Link <- 
+  addmargins(table(Credit_Bureau_Data$EmploymentStatus
+  ,Credit_Bureau_Data$LoanApproved_Interpretation)) 
+Approval_Employment_Link
+```
+
+*First calculate Probability of approved loans for applicants with no employment*
+
+```{r}
+
+Approved_Loans_Unemployed <- nrow(subset(Credit_Bureau_Data, 
+                      EmploymentStatus == "Unemployed" & LoanApproved == "0"))
+
+Probability_Approved_Loans_Unemployed <- 
+  round (Approved_Loans_Unemployed/Total_Applicants,2)
+
+Probability_Approved_Loans_Unemployed
+```
+
+*Probability that an a loan is approved is already given as the variable Probability_Approved_Loan*
+
+Probability(A\|B) =
+
+```{r}
+
+Probability_A_given_B_2 <- 
+  round (Probability_Approved_Loans_Unemployed/Probability_Approved_Loan,2)
+
+Probability_A_given_B_2
+```
+
+**Explanation**
+
+There is only 8% percent chance that an applicant is unemployed given that his loan was approved. One can logically conclude that an applicant's employment status forms a significant part the loan approval process for this Lender.
+
+# MAIN FINDINGS
+
+```{=tex}
+\vspace{-2.3em}
+\hrulefill
+\rule{\linewidth}{1pt}
+```
+The study sheds the main insights as follows:
+
+1.  while highly creditworthy comparative to other applicant educational levels, doctorate degree holders make up a small fraction of approved loans.
+
+2.  employment status is a key factor in the loan approval process, as only 8% of approved applicants are unemployed.
+
+3.  a notable finding is that 60% of applicants seeking loans for home-related purposes already have a mortgage or own their homes, highlighting a strong demand for home loans.
+
+4.  loan approval rates are high, with a 76% likelihood of approval overall.
