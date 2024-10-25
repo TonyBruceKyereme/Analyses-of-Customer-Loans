@@ -1,2 +1,2 @@
-# Analyses-of-Customer-Loans-Repo
+# Analyses-of-Customer-Loans
  A brief examination of sample customer loans in R
